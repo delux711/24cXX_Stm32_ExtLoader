@@ -10,10 +10,10 @@ struct StorageInfo const StorageInfo  =  {
    I2C_EEPROM,// SPI_FLASH         					 // Device Type
    0x00000000,                						 // Device Start Address
    0x800,// 0x00800000,                 						 // Device Size in Bytes (2kBytes)
-   0x00000010,                 						 // Programming Page Size 16Bytes
+   0x00000001,                 						 // Programming Page Size 16Bytes
    0xFF,                       						 // Initial Content of Erased Memory
 // Specify Size and Address of Sectors (view example below)
-   0x00000080, 0x00000010,     				 // Sector Num : 128 ,Sector Size: 16Bytes 
+   0x00000010, 0x00000080,     				 // Sector Num : 16 ,Sector Size: 128Bytes 
    0x00000000, 0x00000000
 }; 
 

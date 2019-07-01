@@ -20,7 +20,6 @@ uint8_t HI2C0_ucLastRx;
 const uint8_t HI2C0_ucMaxWaitState = 0xFF;
 
 /* FUNCTIONS */
-void HI2C0_vWaitForSlave(HI2C_Struct *s);
 
 
 /*************************************************************************************/
@@ -143,7 +142,7 @@ void HI2C0_vHandleEvent(void) {
 /*************************************************************************************/
 
 /* set SCL to a high state and wait until the slave releases it too */
-static void HI2C0_vWaitForSlave(HI2C_Struct *s) {
+void HI2C0_vWaitForSlave(HI2C_Struct *s) {
     uint8_t ucWait = HI2C0_ucMaxWaitState;
 
     HI2C0_vInputSCL();
@@ -174,6 +173,20 @@ void HI2C0_vMakeStopCondition(HI2C_Struct *s) {
     HI2C0_vInputSDA();
 }
 
+void HI2C0_vMakeStartCondition() {
+    HI2C0_vSetSDA();
+    HI2C0_vSetSCL();
+
+    /* generate start condition */
+    HI2C0_vOutputSDA();
+    HI2C0_vOutputSCL();
+    HI2C0_vBitDelayH();
+    HI2C0_vClrSDA()   ;
+    HI2C0_vBitDelayH();
+    HI2C0_vClrSCL()   ;
+    HI2C0_vBitDelayL();
+}
+
 void HI2C0_vInit(uint8_t chipAddress, HI2C_Struct *s) {
     s->ucChipAddr = 0x12u;
     s->bIsChippresent = false;
@@ -193,17 +206,7 @@ bool HI2C0_bSetAddr(uint8_t ucAddress, HI2C_Struct *s) {
     /* no errors so far */
     s->HI2C0_ucError = 0u;
 
-    HI2C0_vSetSDA();
-    HI2C0_vSetSCL();
-
-    /* generate start condition */
-    HI2C0_vOutputSDA();
-    HI2C0_vOutputSCL();
-    HI2C0_vBitDelayH();
-    HI2C0_vClrSDA()   ;
-    HI2C0_vBitDelayH();
-    HI2C0_vClrSCL()   ;
-    HI2C0_vBitDelayL();
+    HI2C0_vMakeStartCondition();
 
     /* transmit address */
     return HI2C0_bSetTxData(ucAddress, 0u, s);

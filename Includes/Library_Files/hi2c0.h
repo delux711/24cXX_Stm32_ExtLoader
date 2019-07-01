@@ -603,4 +603,6 @@ extern void HI2C0_vBitDelayH(void);
 */
 extern void HI2C0_vBitDelayL(void);
 extern void HI2C0_vMakeStopCondition(HI2C_Struct *s);
+extern void HI2C0_vMakeStartCondition(void);
+extern void HI2C0_vWaitForSlave(HI2C_Struct *s);
 #endif // _HI2C0_H
