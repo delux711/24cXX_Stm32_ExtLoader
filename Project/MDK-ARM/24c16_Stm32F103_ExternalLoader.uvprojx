@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>24C02_Stm32F103_ExternalLoader</TargetName>
+      <TargetName>24C16_Stm32F103_ExternalLoader</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Output\</OutputDirectory>
-          <OutputName>24c02_Stm32F103_ExternalLoader</OutputName>
+          <OutputName>24c16_Stm32F103_ExternalLoader</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -83,7 +83,7 @@
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
             <UserProg1Name>cmd.exe /C copy "!L" "..\..\@L.stldr"</UserProg1Name>
-            <UserProg2Name>cmd.exe /C copy "!L" "l:\Install\STMicroelectronics\STM32 ST-LINK Utility\ST-LINK Utility\ExternalLoader\24c02.stldr"</UserProg2Name>
+            <UserProg2Name>cmd.exe /C copy "!L" "l:\Install\STMicroelectronics\STM32 ST-LINK Utility\ST-LINK Utility\ExternalLoader\24c16.stldr"</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -392,11 +392,6 @@
               <FilePath>..\..\Sources\Loader_Files\Loader_Src.c</FilePath>
             </File>
             <File>
-              <FileName>stm32_i2c_24c02.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Sources\Loader_Files\stm32_i2c_24c02.c</FilePath>
-            </File>
-            <File>
               <FileName>system_stm32f10x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Sources\Library_Files\system_stm32f10x.c</FilePath>
@@ -405,6 +400,11 @@
               <FileName>hi2c0.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Sources\Library_Files\hi2c0.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32_i2c_24c16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Sources\Loader_Files\stm32_i2c_24c16.c</FilePath>
             </File>
           </Files>
         </Group>

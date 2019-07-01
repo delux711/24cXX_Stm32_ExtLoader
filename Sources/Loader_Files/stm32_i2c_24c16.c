@@ -1,4 +1,4 @@
-#include "stm32_i2c_24c02.h"
+#include "stm32_i2c_24c16.h"
 #include "stm32f10x.h"
 #include "hi2c0.h"
 //#include "stm32f10x_i2c.h"

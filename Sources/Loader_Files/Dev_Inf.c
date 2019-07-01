@@ -6,7 +6,7 @@ __root struct StorageInfo const StorageInfo  =  {
 #else
 struct StorageInfo const StorageInfo  =  {
 #endif
-   "24c02_STM32F103",//"M25P64_STM3210E-EVAL", 	 	 // Device Name + version number
+   "24c16_STM32F103",//"M25P64_STM3210E-EVAL", 	 	 // Device Name + version number
    I2C_EEPROM,// SPI_FLASH         					 // Device Type
    0x00000000,                						 // Device Start Address
    0x800,// 0x00800000,                 						 // Device Size in Bytes (2kBytes)
