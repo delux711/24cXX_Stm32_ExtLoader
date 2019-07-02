@@ -44,9 +44,13 @@ bool sFLASH_Init(void) {
     HI2C0_vMakeStartCondition();
     HI2C0_vMakeStopCondition(&s);   // RESET of chip
 
-    ret = HI2C0_bSetAddr(HI2C0_getChipAddress(&s), &s);
-    (void)ret;
-    HI2C0_vMakeStopCondition(&s);
+    for(i = 0u; i < 16u; i+=2u) {
+        ret = HI2C0_bSetAddr(HI2C0_getChipAddress(&s) | i, &s);
+        HI2C0_vMakeStopCondition(&s);
+        if(ret) {
+            break;
+        }
+    }
     return ret;
 }
 
