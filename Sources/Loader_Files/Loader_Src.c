@@ -1,5 +1,5 @@
 #include "stm32f10x.h"
-#if defined(I2C_24C02)
+#if defined(I2C_24C16) || defined(I2C_24C512)
 #include "stm32_i2c_24c16.h"
 #else
 #include "stm32_eval_spi_flash.h"
@@ -101,21 +101,10 @@ int MassErase (void)
   */
 int SectorErase (uint32_t EraseStartAddress ,uint32_t EraseEndAddress)
 {
-#if defined(I2C_24C02)
     if(false == sFLASH_EraseSector(EraseStartAddress ,EraseEndAddress)) {
         return 0;
     }
     return 1;
-    //return (int) sFLASH_EraseSector(EraseStartAddress ,EraseEndAddress);
-#else
-  EraseStartAddress = EraseStartAddress -  EraseStartAddress%0x10000;
-  while (EraseEndAddress>=EraseStartAddress)
-  {
-    sFLASH_EraseSector(EraseStartAddress);
-    EraseStartAddress += 0x10000;
-  }
-  return 1;	
-#endif
 }
 
 /**

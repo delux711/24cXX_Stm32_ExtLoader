@@ -351,7 +351,7 @@ bool HI2C0_bForceBusRelease(void) {
     return (bSdaStatus);
 }
 
-uint8_t HI2C0_readByte(uint8_t addr, bool stop, HI2C_Struct *s) {
+uint8_t HI2C0_readByte(HI2C_ADDRESS_LENGTH addr, bool stop, HI2C_Struct *s) {
     uint8_t ret;
     ret = 0u;
     if(true == HI2C0_writeAddr(addr, true, s)) {
@@ -361,8 +361,8 @@ uint8_t HI2C0_readByte(uint8_t addr, bool stop, HI2C_Struct *s) {
     }
     return ret;
 }
-    
-bool HI2C0_writeByte(uint8_t addr, bool stop, uint8_t data, HI2C_Struct *s) {
+
+bool HI2C0_writeByte(HI2C_ADDRESS_LENGTH addr, bool stop, uint8_t data, HI2C_Struct *s) {
     bool ret;
     ret = false;
     if(true == HI2C0_writeAddr(addr, false, s)) { // write
@@ -373,10 +373,10 @@ bool HI2C0_writeByte(uint8_t addr, bool stop, uint8_t data, HI2C_Struct *s) {
     return ret;
 }
 
+#if defined(I2C_24C16)
 bool HI2C0_writeAddr(uint8_t addr, bool stop, HI2C_Struct *s) {
     bool ret;
     ret = false;
-    //if(true == HI2C0_bSetAddr(ucChipAddr)) { // write
     if(true == HI2C0_bSetAddr(HI2C0_getChipAddress(s), s)) { // write
         s->bIsChippresent = true;
         if(true == HI2C0_bSetTxData(addr, stop, s)) { // write address
@@ -389,6 +389,22 @@ bool HI2C0_writeAddr(uint8_t addr, bool stop, HI2C_Struct *s) {
     }
     return ret;
 }
+#elif defined(I2C_24C512)
+bool HI2C0_writeAddr(uint16_t addr, bool stop, HI2C_Struct *s) {
+    bool ret;
+    ret = false;
+    s->bIsChippresent = false;
+    if(true == HI2C0_bSetAddr(HI2C0_getChipAddress(s), s)) { // write
+        if(true == HI2C0_bSetTxData(((addr >> 8u) & 0xFFu), false, s)) { // write address
+            if(true == HI2C0_bSetTxData((addr & 0xFFu), stop, s)) { // write address
+                s->bIsChippresent = true;
+                ret = true;
+            }
+        }
+    }
+    return ret;
+}
+#endif
 
 void HI2C0_setChipAddress(uint8_t chipAddress, HI2C_Struct *s) {
     s->ucChipAddr = (uint8_t)(0xFEu & chipAddress);

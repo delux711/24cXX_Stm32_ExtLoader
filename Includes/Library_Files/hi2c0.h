@@ -5,6 +5,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if defined(I2C_24C16)
+#define HI2C_ADDRESS_LENGTH   uint8_t
+#elif defined(I2C_24C512)
+#define HI2C_ADDRESS_LENGTH   uint16_t
+#endif
+
 /*
 extern bool HI2C0_bEventEnabled;
 extern bool bIsChippresent;
@@ -53,10 +59,10 @@ typedef struct _HI2C_Struct {
 */
 extern const uint8_t HI2C0_ucMaxWaitState;
 
-extern bool HI2C0_writeByte(uint8_t addr, bool stop, uint8_t data, HI2C_Struct *s);
-extern bool HI2C0_writeAddr(uint8_t addr, bool stop, HI2C_Struct *s);
+extern bool HI2C0_writeByte(HI2C_ADDRESS_LENGTH addr, bool stop, uint8_t data, HI2C_Struct *s);
+extern bool HI2C0_writeAddr(HI2C_ADDRESS_LENGTH addr, bool stop, HI2C_Struct *s);
 extern bool HI2C0_isChipPresent(HI2C_Struct *s);
-extern uint8_t HI2C0_readByte(uint8_t addr, bool stop, HI2C_Struct *s);
+extern uint8_t HI2C0_readByte(HI2C_ADDRESS_LENGTH addr, bool stop, HI2C_Struct *s);
 extern uint8_t HI2C0_getChipAddress(HI2C_Struct *s);
 extern void HI2C0_setChipAddress(uint8_t chipAddress, HI2C_Struct *s);
 
