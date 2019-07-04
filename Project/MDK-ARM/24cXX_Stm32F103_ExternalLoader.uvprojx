@@ -402,9 +402,9 @@
               <FilePath>..\..\Sources\Library_Files\hi2c0.c</FilePath>
             </File>
             <File>
-              <FileName>stm32_i2c_24c16.c</FileName>
+              <FileName>stm32_i2c_24cXX.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\Sources\Loader_Files\stm32_i2c_24c16.c</FilePath>
+              <FilePath>..\..\Sources\Loader_Files\stm32_i2c_24cXX.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -806,9 +806,9 @@
               <FilePath>..\..\Sources\Library_Files\hi2c0.c</FilePath>
             </File>
             <File>
-              <FileName>stm32_i2c_24c16.c</FileName>
+              <FileName>stm32_i2c_24cXX.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\Sources\Loader_Files\stm32_i2c_24c16.c</FilePath>
+              <FilePath>..\..\Sources\Loader_Files\stm32_i2c_24cXX.c</FilePath>
             </File>
           </Files>
         </Group>

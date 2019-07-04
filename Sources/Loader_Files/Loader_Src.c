@@ -1,6 +1,6 @@
 #include "stm32f10x.h"
 #if defined(I2C_24C16) || defined(I2C_24C512)
-#include "stm32_i2c_24c16.h"
+#include "stm32_i2c_24cXX.h"
 #else
 #include "stm32_eval_spi_flash.h"
 #include "stm3210e_eval.h"
