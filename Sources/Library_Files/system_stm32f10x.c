@@ -1,3 +1,4 @@
+#if defined(STM32F10X_MD)
 /**
   ******************************************************************************
   * @file    system_stm32f10x.c
@@ -1150,3 +1151,4 @@ static void SetSysClockToHSI64(void)
   * @}
   */    
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+#endif

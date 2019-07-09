@@ -1,12 +1,4 @@
 #include "hi2c0.h"
-#include "stm32f10x.h"
-
-#define GPIO_CRH_MODE12_Pos               ((12 - 8) * 4)
-#define GPIO_CRH_MODE13_Pos               ((13 - 8) * 4)
-#define HI2C_OUTPUT_OPEN_DRAIN_ENABLE     (0x3u)    ///< 50MHz output with open drain. See GPIOx_CRL register
-#define HI2C_INPUT_PULL_UP_ENABLE         (0x4u)    ///< Input float. See GPIOx_CRL register
-#define HI2C_OUTPUT                       HI2C_OUTPUT_OPEN_DRAIN_ENABLE
-#define HI2C_INPUT                        HI2C_INPUT_PULL_UP_ENABLE
 
 /*
 bool HI2C0_bEventEnabled;
@@ -25,35 +17,47 @@ const uint8_t HI2C0_ucMaxWaitState = 0xFF;
 /*************************************************************************************/
 
 void HI2C0_vInitPort(void) {
-    uint32_t tempCR;
-    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;      /* enable clock for GPIOx */
+    //uint32_t tempCR;
+    //RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;      /* enable clock for GPIOx */
+    HI2C0_vEnablePort(SCL_PORT);
+    HI2C0_vEnablePort(SDA_PORT);
+    HI2C0_vEnablePort(RW_PORT);
     /*
     GPIOB->OTYPER &= ~(GPIO_OTYPER_OT13);
     GPIOB->OTYPER |= (1u << GPIO_OTYPER_OT13_Pos);
     GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPD13);
     GPIOB->PUPDR |= (1u << GPIO_PUPDR_PUPD13_Pos); // pull-up
     */
+    /*
     tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF12 | GPIO_CRH_MODE12 | GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
     tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE12_Pos);
     tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE13_Pos);
-    GPIOB->CRH = tempCR;
+    GPIOB->CRH = tempCR;*/
+    HI2C0_vSetDirSCL(HI2C_INPUT);
+    HI2C0_vSetDirSDA(HI2C_INPUT);
+    HI2C0_vSetDirRW(HI2C_OUTPUT);
 }
 
 
 void HI2C0_vOutputSCL(void) {
-    uint32_t tempCR;
+    //uint32_t tempCR;
+    /*
     tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF12 | GPIO_CRH_MODE12);
     tempCR |= (uint32_t)((uint32_t)HI2C_OUTPUT << GPIO_CRH_MODE12_Pos);
-    GPIOB->CRH = tempCR;/*
+    GPIOB->CRH = tempCR;*/
+    HI2C0_vSetDirSCL(HI2C_OUTPUT);
+    /*
     GPIOB->MODER &= ~(GPIO_MODER_MODE12);
     GPIOB->MODER |= (1U << GPIO_MODER_MODE12_Pos);*/
 }
 
 void HI2C0_vInputSCL(void) {
-    uint32_t tempCR;
+    /*uint32_t tempCR;
     tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF12 | GPIO_CRH_MODE12);
     tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE12_Pos);
-    GPIOB->CRH = tempCR;/*
+    GPIOB->CRH = tempCR;*/
+    HI2C0_vSetDirSCL(HI2C_INPUT);
+    /*
     GPIOB->MODER &= ~(GPIO_MODER_MODE12);
     GPIOB->MODER |= (0U << GPIO_MODER_MODE12_Pos);*/
 }
@@ -67,23 +71,28 @@ void HI2C0_vSetSCL(void) {
 }
 
 bool HI2C0_bGetSCL(void) {
-    return GPIOB->IDR & GPIO_IDR_IDR12;
+    //return GPIOB->IDR & GPIO_IDR_IDR12;
+    return HI2C0_bGetPin(SCL_PORT, SCL_PIN);
 }
 
 void HI2C0_vOutputSDA(void) {
-    uint32_t tempCR;
+    /*uint32_t tempCR;
     tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
     tempCR |= (uint32_t)((uint32_t)HI2C_OUTPUT << GPIO_CRH_MODE13_Pos);
-    GPIOB->CRH = tempCR;/*
+    GPIOB->CRH = tempCR;*/
+    HI2C0_vSetDirSDA(HI2C_OUTPUT);
+    /*
     GPIOB->MODER &= ~(GPIO_MODER_MODE13);
     GPIOB->MODER |= (1U << GPIO_MODER_MODE13_Pos);*/
 }
 
 void HI2C0_vInputSDA(void) {
-    uint32_t tempCR;
+    /*uint32_t tempCR;
     tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
     tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE13_Pos);
-    GPIOB->CRH = tempCR;/*
+    GPIOB->CRH = tempCR;*/
+    HI2C0_vSetDirSDA(HI2C_INPUT);
+    /*
     GPIOB->MODER &= ~(GPIO_MODER_MODE13);
     GPIOB->MODER |= (0U << GPIO_MODER_MODE13_Pos);*/
 }
@@ -97,7 +106,8 @@ void HI2C0_vSetSDA(void) {
 }
 
 bool HI2C0_bGetSDA(void) {
-    return GPIOB->IDR & GPIO_IDR_IDR13;
+    //return GPIOB->IDR & GPIO_IDR_IDR13;
+    return HI2C0_bGetPin(SDA_PORT, SDA_PIN);
 }
 
 
@@ -416,4 +426,25 @@ uint8_t HI2C0_getChipAddress(HI2C_Struct *s) {
 
 bool HI2C0_isChipPresent(HI2C_Struct *s) {
     return s->bIsChippresent;
+}
+
+void HI2C0_vWriteDisable(void) {
+    HI2C0_vSetPin(1u, RW_PORT, RW_PIN);
+}
+
+void HI2C0_vWriteEnable(void) {
+    HI2C0_vSetPin(0u, RW_PORT, RW_PIN);
+}
+
+void LED_vInit(void) {
+    HI2C0_vEnablePort(LED_PORT);
+}
+
+void LED_vSet(bool onOFF) {
+    HI2C0_vSetPin(onOFF, LED_PORT, LED_PIN);
+}
+
+bool LED_bGet(void) {
+    //return GPIOC->ODR & GPIO_ODR_ODR13;
+    return HI2C0_bGetPin(LED_PORT, LED_PIN);
 }

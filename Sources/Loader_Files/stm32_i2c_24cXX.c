@@ -1,7 +1,5 @@
 #include "stm32_i2c_24cXX.h"
-#include "stm32f10x.h"
 #include "hi2c0.h"
-//#include "stm32f10x_i2c.h"
 
 #define EE24C_CHIP_ADDRESS    (0xA0u)
 
@@ -25,16 +23,20 @@ static inline void sFlash_WriteDisable(void) { GPIOB->BSRR |= GPIO_BSRR_BS14; }
 */
 bool sFLASH_Init(void) {
     uint8_t i;
-    uint32_t config;
+    //uint32_t config;
     HI2C_Struct s = { false, false, EE24C_CHIP_ADDRESS, 0u, 0u};
     
     
     // pin WP
-    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;      // enable clock for GPIOx
+    //RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;      // enable clock for GPIOx
+    HI2C0_vEnablePort(LED_PORT);
+    /*
     config = (GPIOB->CRH & (~(GPIO_CRH_MODE14 | GPIO_CRH_CNF14)));
     config |= (uint32_t)((uint32_t)PIN_OUTPUT << GPIO_CRH_MODE14_Pos);
     GPIOB->BSRR |= GPIO_BSRR_BS14; //sFlash_WriteDisable();
     GPIOB->CRH = config;
+    */
+    HI2C0_vWriteDisable();
 
     HI2C0_vInit(EE24C_CHIP_ADDRESS, &s);
 
@@ -63,10 +65,13 @@ bool sFLASH_ReadBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
     uint8_t temp;
     HI2C_Struct s = { false, false, EE24C_CHIP_ADDRESS, 0u, 0u};
     if(sFlash_searchFirstChip(&s)) {
-        if(GPIOC->ODR & GPIO_ODR_ODR13)
+        /*
+        if(LED_bGet())
             GPIOC->BSRR |= GPIO_BSRR_BR13;
         else
             GPIOC->BSRR |= GPIO_BSRR_BS13;
+        */
+        LED_vSet(!LED_bGet());
         if(0u < Size) {
             if(Size <= 1) {
                 i2cStop = true;
@@ -97,7 +102,8 @@ bool sFLASH_WriteBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
     uint8_t i;
     HI2C_Struct s = { false, false, EE24C_CHIP_ADDRESS, 0u, 0u};
     if(sFlash_searchFirstChip(&s)) {
-        GPIOB->BSRR |= GPIO_BSRR_BR14; //sFlash_WriteEnable();
+        //GPIOB->BSRR |= GPIO_BSRR_BR14; //sFlash_WriteEnable();
+        HI2C0_vWriteEnable();
         while(0 < Size) {
 #if defined(I2C_24C16)
             sFlash_setAddressUpper(Address, &s);

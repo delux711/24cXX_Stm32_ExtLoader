@@ -5,19 +5,116 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if defined(STM32F10X_MD)
+#include "stm32f10x.h"
+
+#define SCL_PIN  12
+#define SCL_PORT B
+
+#define SDA_PIN  13
+#define SDA_PORT B
+
+#define RW_PIN   14
+#define RW_PORT  B
+
+#define LED_PIN  13
+#define LED_PORT C
+
+#elif defined(STM32L476xx)
+#include "stm32l4xx.h"
+
+#define SCL_PIN  13
+#define SCL_PORT E
+
+#define SDA_PIN  14
+#define SDA_PORT E
+
+#define RW_PIN   15
+#define RW_PORT  E
+
+#define LED_PIN  2
+#define LED_PORT B
+
+#else
+#error "Please select first the target STM32F10X_MD or STM32L476xx!"
+#endif
+
+
 #if defined(I2C_24C16)
 #define HI2C_ADDRESS_LENGTH   uint8_t
 #elif defined(I2C_24C512)
 #define HI2C_ADDRESS_LENGTH   uint16_t
 #endif
 
-/*
-extern bool HI2C0_bEventEnabled;
-extern bool bIsChippresent;
-extern uint8_t ucChipAddr;
-extern uint8_t HI2C0_ucError;
-extern uint8_t HI2C0_ucLastRx;
-*/
+#if defined(STM32F10X_MD)
+#define GPIO_CRL_Pos                      (0u)
+#define GPIO_CRH_Pos                      (8u)
+#if SCL_PIN < 8
+#define SCL_CRLH    L
+#else
+#define SCL_CRLH    H
+#endif
+#if SDA_PIN < 8
+#define SDA_CRLH    L
+#else
+#define SDA_CRLH    H
+#endif
+#if RW_PIN < 8
+#define RW_CRLH    L
+#else
+#define RW_CRLH    H
+#endif
+#if LED_PIN < 8
+#define LED_CRLH    L
+#else
+#define LED_CRLH    H
+#endif
+#define HI2C_OUTPUT_OPEN_DRAIN_ENABLE        (0x3u)    ///< 50MHz output with open drain. See GPIOx_CRL register
+#define HI2C_INPUT_PULL_UP_ENABLE            (0x4u)    ///< Input float. See GPIOx_CRL register
+#define HI2C_OUTPUT                          HI2C_OUTPUT_OPEN_DRAIN_ENABLE
+#define HI2C_INPUT                           HI2C_INPUT_PULL_UP_ENABLE
+
+#define _HI2C0_vEnablePort(port)             RCC->APB2ENR |= RCC_APB2ENR_IOP##port##EN;
+
+#define _HI2C0_vSetDir(inOut,port,pin,crlh)  do {                                                                                                     \
+                                                 uint32_t tempCR;                                                                                     \
+                                                 tempCR = GPIO##port##->CR##crlh & ~(uint32_t)(GPIO_CR##crlh##_CNF##pin | GPIO_CR##crlh##_MODE##pin); \
+                                                 tempCR |= (uint32_t)((uint32_t)inOut << ((##pin - GPIO_CR##crlh##_Pos) * 4u));                       \
+                                                 GPIO##port##->CR##crlh = tempCR;                                                                     \
+                                             } while(0)
+#define HI2C0_vSetDir(inOut,port,pin,crlh)   _HI2C0_vSetDir(inOut,port,pin,crlh)
+
+#define _HI2C0_bGetPin(port,pin)             ((bool)(GPIO##port##->IDR & GPIO_IDR_IDR##pin))
+    
+#define HI2C0_vSetDirSCL(inOut)              HI2C0_vSetDir(inOut, SCL_PORT, SCL_PIN, SCL_CRLH)
+#define HI2C0_vSetDirSDA(inOut)              HI2C0_vSetDir(inOut, SDA_PORT, SDA_PIN, SDA_CRLH)
+#define HI2C0_vSetDirRW(inOut)               HI2C0_vSetDir(inOut, RW_PORT , RW_PIN , RW_CRLH)
+
+#elif defined(STM32L476xx)
+#define HI2C_OUTPUT                          (1u)
+#define HI2C_INPUT                           (0u)
+
+#define _HI2C0_vEnablePort(port)             RCC->AHB2ENR |= RCC_AHB2ENR_GPIO##port##EN;
+
+#define _HI2C0_vSetDir(inOut,port,pin)       do {                                                              \
+                                                 GPIO##port##->MODER &= ~(GPIO_MODER_MODE##pin);               \
+                                                 GPIO##port##->MODER |= (inOut << GPIO_MODER_MODE##pin##_Pos); \
+                                             } while(0)
+#define HI2C0_vSetDir(inOut,port,pin)        _HI2C0_vSetDir(inOut,port,pin)
+
+#define _HI2C0_bGetPin(port,pin)             ((bool)(GPIO##port##->IDR & GPIO_IDR_ID##pin))
+
+#define HI2C0_vSetDirSCL(inOut)              HI2C0_vSetDir(inOut, SCL_PORT, SCL_PIN)
+#define HI2C0_vSetDirSDA(inOut)              HI2C0_vSetDir(inOut, SDA_PORT, SDA_PIN)
+#define HI2C0_vSetDirRW(inOut)               HI2C0_vSetDir(inOut, RW_PORT , RW_PIN)
+
+#endif
+#define _HI2C0_vSetPin(log,port,pin)         do { if(log) { GPIO##port##->BSRR |= GPIO_BSRR_BS##pin; } else { GPIO##port##->BSRR |= GPIO_BSRR_BR##pin; } }while(0)
+
+#define HI2C0_vEnablePort(port)              _HI2C0_vEnablePort(port)
+#define HI2C0_bGetPin(port,pin)              _HI2C0_bGetPin(port,pin)
+#define HI2C0_vSetPin(log,port,pin)          _HI2C0_vSetPin(log,port,pin)
+
 typedef struct _HI2C_Struct {
     bool HI2C0_bEventEnabled;
     bool bIsChippresent;
@@ -67,6 +164,9 @@ extern uint8_t HI2C0_getChipAddress(HI2C_Struct *s);
 extern void HI2C0_setChipAddress(uint8_t chipAddress, HI2C_Struct *s);
 
 /************************************************************************************/
+extern void LED_vInit(void);
+extern void LED_vSet(bool onOFF);
+extern bool LED_bGet(void);
 
 /** Initializes the port of the HI2C.
 \b package: \n
@@ -611,4 +711,6 @@ extern void HI2C0_vBitDelayL(void);
 extern void HI2C0_vMakeStopCondition(HI2C_Struct *s);
 extern void HI2C0_vMakeStartCondition(void);
 extern void HI2C0_vWaitForSlave(HI2C_Struct *s);
+extern void HI2C0_vWriteDisable(void);
+extern void HI2C0_vWriteEnable(void);
 #endif // _HI2C0_H

@@ -1,4 +1,3 @@
-#include "stm32f10x.h"
 #if defined(I2C_24C16) || defined(I2C_24C512)
 #include "stm32_i2c_24cXX.h"
 #else
