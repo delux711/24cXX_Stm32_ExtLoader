@@ -36,9 +36,9 @@ bool sFLASH_Init(void) {
     GPIOB->BSRR |= GPIO_BSRR_BS14; //sFlash_WriteDisable();
     GPIOB->CRH = config;
     */
-    HI2C0_vWriteDisable();
 
     HI2C0_vInit(EE24C_CHIP_ADDRESS, &s);
+    HI2C0_vWriteDisable();
 
     HI2C0_vSetSDA();
     HI2C0_vSetSCL();
@@ -64,6 +64,7 @@ bool sFLASH_ReadBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
     bool i2cStop = false;
     uint8_t temp;
     HI2C_Struct s = { false, false, EE24C_CHIP_ADDRESS, 0u, 0u};
+    HI2C0_vWriteDisable();
     if(sFlash_searchFirstChip(&s)) {
         /*
         if(LED_bGet())
@@ -137,7 +138,8 @@ bool sFLASH_WriteBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
                 }
             }
         }
-        GPIOB->BSRR |= GPIO_BSRR_BS14; //sFlash_WriteDisable();
+        //GPIOB->BSRR |= GPIO_BSRR_BS14; //sFlash_WriteDisable();
+        HI2C0_vWriteDisable();
     }
     return ret;
 }

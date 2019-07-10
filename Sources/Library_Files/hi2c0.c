@@ -22,6 +22,9 @@ void HI2C0_vInitPort(void) {
     HI2C0_vEnablePort(SCL_PORT);
     HI2C0_vEnablePort(SDA_PORT);
     HI2C0_vEnablePort(RW_PORT);
+
+    HI2C0_vInitOpenDrainPullUp(SCL_PORT, SCL_PIN);
+    HI2C0_vInitOpenDrainPullUp(SDA_PORT, SDA_PIN);
     /*
     GPIOB->OTYPER &= ~(GPIO_OTYPER_OT13);
     GPIOB->OTYPER |= (1u << GPIO_OTYPER_OT13_Pos);
@@ -33,6 +36,7 @@ void HI2C0_vInitPort(void) {
     tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE12_Pos);
     tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE13_Pos);
     GPIOB->CRH = tempCR;*/
+    HI2C0_vWriteDisable();
     HI2C0_vSetDirSCL(HI2C_INPUT);
     HI2C0_vSetDirSDA(HI2C_INPUT);
     HI2C0_vSetDirRW(HI2C_OUTPUT);
@@ -63,11 +67,13 @@ void HI2C0_vInputSCL(void) {
 }
 
 void HI2C0_vClrSCL(void) {
-    GPIOB->BSRR |= GPIO_BSRR_BR12;
+    //GPIOB->BSRR |= GPIO_BSRR_BR12;
+    HI2C0_vSetPin(0u, SCL_PORT, SCL_PIN);
 }
 
 void HI2C0_vSetSCL(void) {
-    GPIOB->BSRR |= GPIO_BSRR_BS12;
+    //GPIOB->BSRR |= GPIO_BSRR_BS12;
+    HI2C0_vSetPin(1u, SCL_PORT, SCL_PIN);
 }
 
 bool HI2C0_bGetSCL(void) {
@@ -98,11 +104,13 @@ void HI2C0_vInputSDA(void) {
 }
 
 void HI2C0_vClrSDA(void) {
-   GPIOB->BSRR |= GPIO_BSRR_BR13;
+   //GPIOB->BSRR |= GPIO_BSRR_BR13;
+    HI2C0_vSetPin(0u, SDA_PORT, SDA_PIN);
 }
 
 void HI2C0_vSetSDA(void) {
-   GPIOB->BSRR |= GPIO_BSRR_BS13;
+   //GPIOB->BSRR |= GPIO_BSRR_BS13;
+    HI2C0_vSetPin(1u, SDA_PORT, SDA_PIN);
 }
 
 bool HI2C0_bGetSDA(void) {

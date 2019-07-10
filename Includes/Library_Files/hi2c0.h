@@ -69,8 +69,8 @@
 #else
 #define LED_CRLH    H
 #endif
-#define HI2C_OUTPUT_OPEN_DRAIN_ENABLE        (0x3u)    ///< 50MHz output with open drain. See GPIOx_CRL register
-#define HI2C_INPUT_PULL_UP_ENABLE            (0x4u)    ///< Input float. See GPIOx_CRL register
+#define HI2C_OUTPUT_OPEN_DRAIN_ENABLE        (0x7u)    ///< 50MHz output with open drain. See GPIOx_CRL register
+#define HI2C_INPUT_PULL_UP_ENABLE            (0x8u)    ///< Input float. See GPIOx_CRL register
 #define HI2C_OUTPUT                          HI2C_OUTPUT_OPEN_DRAIN_ENABLE
 #define HI2C_INPUT                           HI2C_INPUT_PULL_UP_ENABLE
 
@@ -89,6 +89,7 @@
 #define HI2C0_vSetDirSCL(inOut)              HI2C0_vSetDir(inOut, SCL_PORT, SCL_PIN, SCL_CRLH)
 #define HI2C0_vSetDirSDA(inOut)              HI2C0_vSetDir(inOut, SDA_PORT, SDA_PIN, SDA_CRLH)
 #define HI2C0_vSetDirRW(inOut)               HI2C0_vSetDir(inOut, RW_PORT , RW_PIN , RW_CRLH)
+#define HI2C0_vInitOpenDrainPullUp(port,pin)
 
 #elif defined(STM32L476xx)
 #define HI2C_OUTPUT                          (1u)
@@ -96,9 +97,10 @@
 
 #define _HI2C0_vEnablePort(port)             RCC->AHB2ENR |= RCC_AHB2ENR_GPIO##port##EN;
 
-#define _HI2C0_vSetDir(inOut,port,pin)       do {                                                              \
-                                                 GPIO##port##->MODER &= ~(GPIO_MODER_MODE##pin);               \
-                                                 GPIO##port##->MODER |= (inOut << GPIO_MODER_MODE##pin##_Pos); \
+#define _HI2C0_vSetDir(inOut,port,pin)       do {                                                                       \
+                                                 uint32_t tempCR = GPIO##port##->MODER & (~(GPIO_MODER_MODE##pin));     \
+                                                 tempCR |= (inOut << GPIO_MODER_MODE##pin##_Pos);                       \
+                                                 GPIO##port##->MODER = tempCR;                                          \
                                              } while(0)
 #define HI2C0_vSetDir(inOut,port,pin)        _HI2C0_vSetDir(inOut,port,pin)
 
@@ -107,6 +109,9 @@
 #define HI2C0_vSetDirSCL(inOut)              HI2C0_vSetDir(inOut, SCL_PORT, SCL_PIN)
 #define HI2C0_vSetDirSDA(inOut)              HI2C0_vSetDir(inOut, SDA_PORT, SDA_PIN)
 #define HI2C0_vSetDirRW(inOut)               HI2C0_vSetDir(inOut, RW_PORT , RW_PIN)
+
+#define _HI2C0_vInitOpenDrainPullUp(port,pin) do { GPIO##port##->OTYPER |= GPIO_OTYPER_OT##pin##_Msk; GPIO##port##->PUPDR |= (1u << GPIO_PUPDR_PUPD##pin##_Pos); } while(0)
+#define HI2C0_vInitOpenDrainPullUp(port,pin) _HI2C0_vInitOpenDrainPullUp(port,pin)
 
 #endif
 #define _HI2C0_vSetPin(log,port,pin)         do { if(log) { GPIO##port##->BSRR |= GPIO_BSRR_BS##pin; } else { GPIO##port##->BSRR |= GPIO_BSRR_BR##pin; } }while(0)
