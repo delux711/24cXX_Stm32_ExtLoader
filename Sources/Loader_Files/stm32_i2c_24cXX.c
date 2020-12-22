@@ -1,42 +1,17 @@
 #include "stm32_i2c_24cXX.h"
 #include "hi2c0.h"
 
-#define EE24C_CHIP_ADDRESS    (0xA0u)
-
-#if defined(I2C_24C16)
-#define EE24C_PROG_PAGE_SIZE  (16u)
-#define EE24C_FULL_EREASE     (0x800u / 256u)   // 8
-#elif defined(I2C_24C512)
-#define EE24C_PROG_PAGE_SIZE  (128u)
-#define EE24C_FULL_EREASE     (0x80000u / 256u) // 2048
-#endif
-
-#define GPIO_CRH_MODE14_Pos ((14 - 8) * 4)
-#define PIN_OUTPUT          (2u)
-
 bool sFlash_isReady(HI2C_Struct *s);
 void sFlash_setAddressUpper(uint32_t address, HI2C_Struct *s);
 bool sFlash_searchFirstChip(HI2C_Struct *s);
-/*
-static inline void sFlash_WriteEnable(void)  { GPIOB->BSRR |= GPIO_BSRR_BR14; }
-static inline void sFlash_WriteDisable(void) { GPIOB->BSRR |= GPIO_BSRR_BS14; }
-*/
+
 bool sFLASH_Init(void) {
     uint8_t i;
-    //uint32_t config;
     HI2C_Struct s = { false, false, EE24C_CHIP_ADDRESS, 0u, 0u};
     
     
-    // pin WP
-    //RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;      // enable clock for GPIOx
-    HI2C0_vEnablePort(LED_PORT);
-    /*
-    config = (GPIOB->CRH & (~(GPIO_CRH_MODE14 | GPIO_CRH_CNF14)));
-    config |= (uint32_t)((uint32_t)PIN_OUTPUT << GPIO_CRH_MODE14_Pos);
-    GPIOB->BSRR |= GPIO_BSRR_BS14; //sFlash_WriteDisable();
-    GPIOB->CRH = config;
-    */
-
+    LED_vInit();
+    LED_vSet(false);
     HI2C0_vInit(EE24C_CHIP_ADDRESS, &s);
     HI2C0_vWriteDisable();
 
@@ -66,12 +41,6 @@ bool sFLASH_ReadBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
     HI2C_Struct s = { false, false, EE24C_CHIP_ADDRESS, 0u, 0u};
     HI2C0_vWriteDisable();
     if(sFlash_searchFirstChip(&s)) {
-        /*
-        if(LED_bGet())
-            GPIOC->BSRR |= GPIO_BSRR_BR13;
-        else
-            GPIOC->BSRR |= GPIO_BSRR_BS13;
-        */
         LED_vSet(!LED_bGet());
         if(0u < Size) {
             if(Size <= 1) {
@@ -79,7 +48,7 @@ bool sFLASH_ReadBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
             } else {
                 i2cStop = false;
             }
-#if defined(I2C_24C16)
+#if defined(EE24C_ONE_BYTE_ADDRESS)
             sFlash_setAddressUpper(Address, &s);
 #endif
             temp = HI2C0_readByte((HI2C_ADDRESS_LENGTH) Address, i2cStop, &s);
@@ -94,6 +63,7 @@ bool sFLASH_ReadBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
             }
         }
     }
+    LED_vSet(false);
     return ret;
 }
 
@@ -103,10 +73,10 @@ bool sFLASH_WriteBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
     uint8_t i;
     HI2C_Struct s = { false, false, EE24C_CHIP_ADDRESS, 0u, 0u};
     if(sFlash_searchFirstChip(&s)) {
-        //GPIOB->BSRR |= GPIO_BSRR_BR14; //sFlash_WriteEnable();
         HI2C0_vWriteEnable();
         while(0 < Size) {
-#if defined(I2C_24C16)
+            LED_vSet(!LED_bGet());
+#if defined(EE24C_ONE_BYTE_ADDRESS)
             sFlash_setAddressUpper(Address, &s);
 #endif
             if(((EE24C_PROG_PAGE_SIZE - 1u) < Size) && (0u == (Address & (EE24C_PROG_PAGE_SIZE - 1u)))) {   // adresa musi byt zarovnana na 16. Inak napaluj po bajte
@@ -138,23 +108,23 @@ bool sFLASH_WriteBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
                 }
             }
         }
-        //GPIOB->BSRR |= GPIO_BSRR_BS14; //sFlash_WriteDisable();
         HI2C0_vWriteDisable();
     }
+    LED_vSet(false);
     return ret;
 }
 
 bool sFLASH_EraseBulk(void) {
     bool ret = false;
-    uint8_t buff[256u];
+    uint8_t buff[EE24C_PROG_PAGE_SIZE];
     uint16_t i, address;
-    for(i = 0u; i < 256u; i++) {
+    for(i = 0u; i < EE24C_PROG_PAGE_SIZE; i++) {
         buff[i] = 0xFF;
     }
     address = 0u;
-    for(i = 0u; i < EE24C_FULL_EREASE; i++) {   // EE24C_FULL_EREASE = (24c16 = 8), (24c512 = 2048)
-        ret = sFLASH_WriteBuffer(buff, address, 256u);
-        address += 256u;
+    for(i = 0u; i < (EE24C_DEVICE_SIZE / EE24C_PROG_PAGE_SIZE); i++) {
+        ret = sFLASH_WriteBuffer(buff, address, EE24C_PROG_PAGE_SIZE);
+        address += EE24C_PROG_PAGE_SIZE;
         if(!ret) {
             break;
         }
@@ -166,12 +136,12 @@ bool sFLASH_EraseBulk(void) {
 bool sFLASH_EraseSector(uint32_t EraseStartAddress ,uint32_t EraseEndAddress) {
     bool ret = false;
     uint8_t i;
-    uint8_t buff[128];
+    uint8_t buff[EE24C_PROG_PAGE_SIZE];
     (void)EraseEndAddress;
-    for(i = 0u; i < 128u; i++) {
+    for(i = 0u; i < EE24C_PROG_PAGE_SIZE; i++) {
         buff[i] = 0xFFu;
     }
-    ret = sFLASH_WriteBuffer(buff, EraseStartAddress, 128u);
+    ret = sFLASH_WriteBuffer(buff, EraseStartAddress, EE24C_PROG_PAGE_SIZE);
     return ret;
 }
 
@@ -183,7 +153,7 @@ bool sFlash_isReady(HI2C_Struct *s) {
     return ret;
 }
 
-#if defined(I2C_24C16)
+#if defined(EE24C_ONE_BYTE_ADDRESS)
 void sFlash_setAddressUpper(uint32_t address, HI2C_Struct *s) {
     address &= 0x700u;
     address >>= 7u;

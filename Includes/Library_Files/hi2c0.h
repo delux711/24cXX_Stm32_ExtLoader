@@ -8,44 +8,41 @@
 #if defined(STM32F10X_MD)
 #include "stm32f10x.h"
 
-#define SCL_PIN  12
-#define SCL_PORT B
-
-#define SDA_PIN  13
-#define SDA_PORT B
-
-#define RW_PIN   14
-#define RW_PORT  B
-
-#define LED_PIN  13
-#define LED_PORT C
+//SCL_PORT=B,SCL_PIN=12,SDA_PORT=B, SDA_PIN=13, RW_PORT=B, RW_PIN=14, LED_PORT=C, LED_PIN=13
+// #define SCL_PIN  12
+// #define SCL_PORT B
+// #define SDA_PIN  13
+// #define SDA_PORT B
+// #define RW_PIN   14
+// #define RW_PORT  B
+// #define LED_PIN  13
+// #define LED_PORT C
 
 #elif defined(STM32L476xx)
 #include "stm32l4xx.h"
 
-#define SCL_PIN  13
-#define SCL_PORT E
-
-#define SDA_PIN  14
-#define SDA_PORT E
-
-#define RW_PIN   15
-#define RW_PORT  E
-
-#define LED_PIN  2
-#define LED_PORT B
+//SCL_PORT=E,SCL_PIN=13,SDA_PORT=E,SDA_PIN=14,RW_PORT=E,RW_PIN=15,LED_PORT=B,LED_PIN=2
+// #define SCL_PIN  13
+// #define SCL_PORT E
+// #define SDA_PIN  14
+// #define SDA_PORT E
+// #define RW_PIN   15
+// #define RW_PORT  E
+// #define LED_PIN  2
+// #define LED_PORT B
 
 #else
 #error "Please select first the target STM32F10X_MD or STM32L476xx!"
 #endif
 
 
-#if defined(I2C_24C16)
+#if defined(EE24C_ONE_BYTE_ADDRESS)
 #define HI2C_ADDRESS_LENGTH   uint8_t
-#elif defined(I2C_24C512)
+#elif defined(EE24C_TWO_BYTES_ADDRESS)
 #define HI2C_ADDRESS_LENGTH   uint16_t
 #endif
 
+/************** STM32L103 ********************/
 #if defined(STM32F10X_MD)
 #define GPIO_CRL_Pos                      (0u)
 #define GPIO_CRH_Pos                      (8u)
@@ -71,7 +68,8 @@
 #endif
 #define HI2C_OUTPUT_OPEN_DRAIN_ENABLE        (0x7u)    ///< 50MHz output with open drain. See GPIOx_CRL register
 #define HI2C_INPUT_PULL_UP_ENABLE            (0x8u)    ///< Input float. See GPIOx_CRL register
-#define HI2C_OUTPUT                          HI2C_OUTPUT_OPEN_DRAIN_ENABLE
+#define HI2C_OUTPUT                          (0x3u)    //< 50MHz output push pull
+#define HI2C_OUTPUT_OPEN_DRAIN               HI2C_OUTPUT_OPEN_DRAIN_ENABLE
 #define HI2C_INPUT                           HI2C_INPUT_PULL_UP_ENABLE
 
 #define _HI2C0_vEnablePort(port)             RCC->APB2ENR |= RCC_APB2ENR_IOP##port##EN;
@@ -88,10 +86,13 @@
     
 #define HI2C0_vSetDirSCL(inOut)              HI2C0_vSetDir(inOut, SCL_PORT, SCL_PIN, SCL_CRLH)
 #define HI2C0_vSetDirSDA(inOut)              HI2C0_vSetDir(inOut, SDA_PORT, SDA_PIN, SDA_CRLH)
-#define HI2C0_vSetDirRW(inOut)               HI2C0_vSetDir(inOut, RW_PORT , RW_PIN , RW_CRLH)
+#define HI2C0_vSetDirRW(inOut)               HI2C0_vSetDir(inOut, RW_PORT , RW_PIN , LED_CRLH)
+#define HI2C0_vSetDirLED(inOut)              HI2C0_vSetDir(inOut, LED_PORT, LED_PIN ,LED_CRLH)
 #define HI2C0_vInitOpenDrainPullUp(port,pin)
 
+/************** STM32L476 ********************/
 #elif defined(STM32L476xx)
+#define HI2C_OUTPUT_OPEN_DRAIN               (1u)
 #define HI2C_OUTPUT                          (1u)
 #define HI2C_INPUT                           (0u)
 
@@ -109,6 +110,7 @@
 #define HI2C0_vSetDirSCL(inOut)              HI2C0_vSetDir(inOut, SCL_PORT, SCL_PIN)
 #define HI2C0_vSetDirSDA(inOut)              HI2C0_vSetDir(inOut, SDA_PORT, SDA_PIN)
 #define HI2C0_vSetDirRW(inOut)               HI2C0_vSetDir(inOut, RW_PORT , RW_PIN)
+#define HI2C0_vSetDirLED(inOut)              HI2C0_vSetDir(inOut, LED_PORT, LED_PIN)
 
 #define _HI2C0_vInitOpenDrainPullUp(port,pin) do { GPIO##port##->OTYPER |= GPIO_OTYPER_OT##pin##_Msk; GPIO##port##->PUPDR |= (1u << GPIO_PUPDR_PUPD##pin##_Pos); } while(0)
 #define HI2C0_vInitOpenDrainPullUp(port,pin) _HI2C0_vInitOpenDrainPullUp(port,pin)

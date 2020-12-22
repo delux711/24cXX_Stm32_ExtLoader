@@ -1,13 +1,5 @@
 #include "hi2c0.h"
 
-/*
-bool HI2C0_bEventEnabled;
-bool bIsChippresent;
-uint8_t ucChipAddr;
-uint8_t HI2C0_ucError;
-uint8_t HI2C0_ucLastRx;
-*/
-
 /* maximum waitstate delay */
 const uint8_t HI2C0_ucMaxWaitState = 0xFF;
 
@@ -17,104 +9,57 @@ const uint8_t HI2C0_ucMaxWaitState = 0xFF;
 /*************************************************************************************/
 
 void HI2C0_vInitPort(void) {
-    //uint32_t tempCR;
-    //RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;      /* enable clock for GPIOx */
     HI2C0_vEnablePort(SCL_PORT);
     HI2C0_vEnablePort(SDA_PORT);
     HI2C0_vEnablePort(RW_PORT);
 
     HI2C0_vInitOpenDrainPullUp(SCL_PORT, SCL_PIN);
     HI2C0_vInitOpenDrainPullUp(SDA_PORT, SDA_PIN);
-    /*
-    GPIOB->OTYPER &= ~(GPIO_OTYPER_OT13);
-    GPIOB->OTYPER |= (1u << GPIO_OTYPER_OT13_Pos);
-    GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPD13);
-    GPIOB->PUPDR |= (1u << GPIO_PUPDR_PUPD13_Pos); // pull-up
-    */
-    /*
-    tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF12 | GPIO_CRH_MODE12 | GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
-    tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE12_Pos);
-    tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE13_Pos);
-    GPIOB->CRH = tempCR;*/
+
     HI2C0_vWriteDisable();
     HI2C0_vSetDirSCL(HI2C_INPUT);
     HI2C0_vSetDirSDA(HI2C_INPUT);
-    HI2C0_vSetDirRW(HI2C_OUTPUT);
+    HI2C0_vSetDirRW(HI2C_OUTPUT_OPEN_DRAIN);
 }
 
 
 void HI2C0_vOutputSCL(void) {
-    //uint32_t tempCR;
-    /*
-    tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF12 | GPIO_CRH_MODE12);
-    tempCR |= (uint32_t)((uint32_t)HI2C_OUTPUT << GPIO_CRH_MODE12_Pos);
-    GPIOB->CRH = tempCR;*/
-    HI2C0_vSetDirSCL(HI2C_OUTPUT);
-    /*
-    GPIOB->MODER &= ~(GPIO_MODER_MODE12);
-    GPIOB->MODER |= (1U << GPIO_MODER_MODE12_Pos);*/
+    HI2C0_vSetDirSCL(HI2C_OUTPUT_OPEN_DRAIN);
 }
 
 void HI2C0_vInputSCL(void) {
-    /*uint32_t tempCR;
-    tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF12 | GPIO_CRH_MODE12);
-    tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE12_Pos);
-    GPIOB->CRH = tempCR;*/
     HI2C0_vSetDirSCL(HI2C_INPUT);
-    /*
-    GPIOB->MODER &= ~(GPIO_MODER_MODE12);
-    GPIOB->MODER |= (0U << GPIO_MODER_MODE12_Pos);*/
 }
 
 void HI2C0_vClrSCL(void) {
-    //GPIOB->BSRR |= GPIO_BSRR_BR12;
     HI2C0_vSetPin(0u, SCL_PORT, SCL_PIN);
 }
 
 void HI2C0_vSetSCL(void) {
-    //GPIOB->BSRR |= GPIO_BSRR_BS12;
     HI2C0_vSetPin(1u, SCL_PORT, SCL_PIN);
 }
 
 bool HI2C0_bGetSCL(void) {
-    //return GPIOB->IDR & GPIO_IDR_IDR12;
     return HI2C0_bGetPin(SCL_PORT, SCL_PIN);
 }
 
 void HI2C0_vOutputSDA(void) {
-    /*uint32_t tempCR;
-    tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
-    tempCR |= (uint32_t)((uint32_t)HI2C_OUTPUT << GPIO_CRH_MODE13_Pos);
-    GPIOB->CRH = tempCR;*/
-    HI2C0_vSetDirSDA(HI2C_OUTPUT);
-    /*
-    GPIOB->MODER &= ~(GPIO_MODER_MODE13);
-    GPIOB->MODER |= (1U << GPIO_MODER_MODE13_Pos);*/
+    HI2C0_vSetDirSDA(HI2C_OUTPUT_OPEN_DRAIN);
 }
 
 void HI2C0_vInputSDA(void) {
-    /*uint32_t tempCR;
-    tempCR = GPIOB->CRH & ~(uint32_t)(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
-    tempCR |= (uint32_t)((uint32_t)HI2C_INPUT << GPIO_CRH_MODE13_Pos);
-    GPIOB->CRH = tempCR;*/
     HI2C0_vSetDirSDA(HI2C_INPUT);
-    /*
-    GPIOB->MODER &= ~(GPIO_MODER_MODE13);
-    GPIOB->MODER |= (0U << GPIO_MODER_MODE13_Pos);*/
 }
 
 void HI2C0_vClrSDA(void) {
-   //GPIOB->BSRR |= GPIO_BSRR_BR13;
     HI2C0_vSetPin(0u, SDA_PORT, SDA_PIN);
 }
 
 void HI2C0_vSetSDA(void) {
-   //GPIOB->BSRR |= GPIO_BSRR_BS13;
     HI2C0_vSetPin(1u, SDA_PORT, SDA_PIN);
 }
 
 bool HI2C0_bGetSDA(void) {
-    //return GPIOB->IDR & GPIO_IDR_IDR13;
     return HI2C0_bGetPin(SDA_PORT, SDA_PIN);
 }
 
@@ -391,7 +336,7 @@ bool HI2C0_writeByte(HI2C_ADDRESS_LENGTH addr, bool stop, uint8_t data, HI2C_Str
     return ret;
 }
 
-#if defined(I2C_24C16)
+#if defined(EE24C_ONE_BYTE_ADDRESS)
 bool HI2C0_writeAddr(uint8_t addr, bool stop, HI2C_Struct *s) {
     bool ret;
     ret = false;
@@ -407,7 +352,7 @@ bool HI2C0_writeAddr(uint8_t addr, bool stop, HI2C_Struct *s) {
     }
     return ret;
 }
-#elif defined(I2C_24C512)
+#elif defined(EE24C_TWO_BYTES_ADDRESS)
 bool HI2C0_writeAddr(uint16_t addr, bool stop, HI2C_Struct *s) {
     bool ret;
     ret = false;
@@ -446,6 +391,7 @@ void HI2C0_vWriteEnable(void) {
 
 void LED_vInit(void) {
     HI2C0_vEnablePort(LED_PORT);
+    HI2C0_vSetDirLED(HI2C_OUTPUT);
 }
 
 void LED_vSet(bool onOFF) {
@@ -453,6 +399,5 @@ void LED_vSet(bool onOFF) {
 }
 
 bool LED_bGet(void) {
-    //return GPIOC->ODR & GPIO_ODR_ODR13;
     return HI2C0_bGetPin(LED_PORT, LED_PIN);
 }

@@ -1,5 +1,5 @@
-#ifndef STM32_I2C_24C02_H
-#define STM32_I2C_24C02_H
+#ifndef STM32_I2C_24CXX_H
+#define STM32_I2C_24CXX_H
 
 #include <stdint.h>
 
@@ -7,7 +7,9 @@
  extern "C" {
 #endif
 
+
 #define HI2C_USED
+#define EE24C_CHIP_ADDRESS    (0xA0u)
 
 #if defined(HI2C_USED)
 #include "hi2c0.h"
@@ -29,6 +31,7 @@ extern bool sFLASH_EraseSector(uint32_t EraseStartAddress ,uint32_t EraseEndAddr
 
 #define LED_PIN  GPIO_Pin_13
 #define LED_PORT GPIOC
+
 
 #define I2C_EE             I2C1
 #define I2C_EE_CLK         RCC_APB1Periph_I2C1

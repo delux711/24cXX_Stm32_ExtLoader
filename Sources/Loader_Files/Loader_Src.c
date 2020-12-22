@@ -1,4 +1,6 @@
-#if defined(I2C_24C16) || defined(I2C_24C512)
+#include "Dev_Inf.h"
+
+#if defined(EE24C_ONE_BYTE_ADDRESS) || defined(EE24C_TWO_BYTES_ADDRESS)
 #include "stm32_i2c_24cXX.h"
 #else
 #include "stm32_eval_spi_flash.h"
