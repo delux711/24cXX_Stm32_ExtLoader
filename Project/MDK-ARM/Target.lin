@@ -1,4 +1,4 @@
-FLASH_LOADER 0x20000004 PI   ; FlashLoader Functions
+FLASH_LOADER 0x20000004    ; FlashLoader Functions
 {
   PrgCode +0           ; Code
   {

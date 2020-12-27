@@ -97,7 +97,7 @@ bool sFLASH_WriteBuffer(uint8_t* buffer, uint32_t Address, uint32_t Size) {
                     break;
                 }
             } else {
-                ret = HI2C0_writeByte((uint8_t) Address, true, *buffer++, &s);
+                ret = HI2C0_writeByte((HI2C_ADDRESS_LENGTH) Address, true, *buffer++, &s);
                 if(ret) {
                     while(!sFlash_isReady(&s));
                     Size--;
